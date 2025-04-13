@@ -71,7 +71,18 @@
       container.innerHTML = "<p class='loading'>✨ Creating your Ghibli masterpiece...</p>";
 
       try {
-        const res = await fetch("http://localhost:8000/generate", {
+        const res = await fetch("function generateImage() {
+  const prompt = document.getElementById("prompt").value;
+  const container = document.getElementById("imageContainer");
+  container.innerHTML = '<p>Generating image...</p>';
+
+  // Use Unsplash as a fake image generator
+  const imageUrl = `https://source.unsplash.com/600x400/?ghibli,anime,${encodeURIComponent(prompt)}`;
+  setTimeout(() => {
+    container.innerHTML = `<img src="${imageUrl}" alt="Generated Ghibli Style Image" />`;
+  }, 1500);
+}
+", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ prompt })
