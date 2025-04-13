@@ -1,41 +1,669 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ghibli Style Image Generator</title>
-  <link href="https://fonts.googleapis.com/css2?family=Signika+Negative:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-      font-family: 'Signika Negative', sans-serif;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ghibli Dream Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ghibli-blue: #6ec4db;
+            --ghibli-green: #a4d7c6;
+            --ghibli-yellow: #f7e5a3;
+            --ghibli-red: #e8928c;
+            --ghibli-dark: #3a5169;
+        }
 
-    body {
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(to bottom, #fdf6e3, #e0f7fa);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    header {
-      text-align: center;
-      padding: 2rem 1rem;
-    }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f0f8ff;
+            color: var(--ghibli-dark);
+            background-image: url('https://i.imgur.com/ZYQJXpM.png');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
 
-    header h1 {
-      font-size: 2.5rem;
-      margin: 0;
-      color: #5d4037;
-    }
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(240, 248, 255, 0.85);
+            z-index: -1;
+        }
 
-    .container {
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      padding: 2rem;
-      width: 90%;
-      max-width:
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: float 15s infinite linear;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(50px) translateY(-20px); }
+            100% { transform: translateX(0) translateY(0); }
+        }
+
+        header {
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            font-family: 'Fredoka One', cursive;
+            color: var(--ghibli-dark);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo span {
+            color: var(--ghibli-blue);
+        }
+
+        .logo img {
+            height: 50px;
+            margin-right: 15px;
+        }
+
+        .tagline {
+            font-style: italic;
+            color: var(--ghibli-dark);
+            margin-bottom: 1rem;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .generator-section {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .section-title {
+            color: var(--ghibli-blue);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title svg {
+            width: 30px;
+            height: 30px;
+        }
+
+        .prompt-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: var(--ghibli-dark);
+        }
+
+        .prompt-input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--ghibli-green);
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            background-color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s;
+        }
+
+        .prompt-input:focus {
+            outline: none;
+            border-color: var(--ghibli-blue);
+            box-shadow: 0 0 0 3px rgba(110, 196, 219, 0.3);
+        }
+
+        .style-presets {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .style-preset {
+            background-color: white;
+            border: 2px solid var(--ghibli-green);
+            border-radius: 8px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 600;
+            color: var(--ghibli-dark);
+        }
+
+        .style-preset:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            border-color: var(--ghibli-blue);
+        }
+
+        .style-preset.active {
+            background-color: var(--ghibli-green);
+            border-color: var(--ghibli-dark);
+            color: white;
+        }
+
+        .slider-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: var(--ghibli-green);
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--ghibli-blue);
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--ghibli-blue);
+            cursor: pointer;
+        }
+
+        .generate-btn {
+            background-color: var(--ghibli-blue);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 700;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .generate-btn:hover {
+            background-color: var(--ghibli-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(110, 196, 219, 0.4);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--ghibli-green);
+            border-top: 5px solid var(--ghibli-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result-section {
+            display: none;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .generated-image {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            display: block;
+            border: 5px solid white;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn {
+            background-color: var(--ghibli-green);
+            color: white;
+            border-color: var(--ghibli-green);
+        }
+
+        .download-btn:hover {
+            background-color: white;
+            color: var(--ghibli-green);
+        }
+
+        .share-btn {
+            background-color: var(--ghibli-yellow);
+            color: var(--ghibli-dark);
+            border-color: var(--ghibli-yellow);
+        }
+
+        .share-btn:hover {
+            background-color: white;
+            color: var(--ghibli-dark);
+        }
+
+        .new-btn {
+            background-color: var(--ghibli-red);
+            color: white;
+            border-color: var(--ghibli-red);
+        }
+
+        .new-btn:hover {
+            background-color: white;
+            color: var(--ghibli-red);
+        }
+
+        .features-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            color: var(--ghibli-blue);
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            color: var(--ghibli-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            margin-top: 3rem;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(5px);
+            color: var(--ghibli-dark);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .footer-link {
+            color: var(--ghibli-blue);
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .footer-link:hover {
+            color: var(--ghibli-dark);
+            text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+            
+            .style-presets {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .action-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Totoro animation */
+        .totoro {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background-image: url('https://i.imgur.com/3ZQZQ9M.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s;
+        }
+
+        .totoro:hover {
+            transform: scale(1.1);
+        }
+
+        /* Music toggle */
+        .music-toggle {
+            position: fixed;
+            bottom: 110px;
+            right: 20px;
+            background-color: var(--ghibli-green);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+            border: none;
+        }
+
+        .music-toggle i {
+            font-size: 1.5rem;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Floating clouds -->
+    <div class="cloud" style="width: 150px; height: 60px; top: 20%; left: 10%;"></div>
+    <div class="cloud" style="width: 200px; height: 80px; top: 30%; right: 15%;"></div>
+    <div class="cloud" style="width: 180px; height: 70px; top: 60%; left: 20%;"></div>
+    <div class="cloud" style="width: 120px; height: 50px; top: 70%; right: 25%;"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <img src="https://i.imgur.com/3ZQZQ9M.png" alt="Totoro">
+            <span>Ghibli</span> Dream Generator
+        </div>
+        <p class="tagline">Turn your imagination into Studio Ghibli magic ✨</p>
+    </header>
+
+    <!-- Main container -->
+    <div class="main-container">
+        <!-- Generator section -->
+        <section class="generator-section">
+            <h2 class="section-title">
+                <i class="fas fa-magic"></i> Create Your Ghibli Masterpiece
+            </h2>
+            <form class="prompt-form" id="generator-form">
+                <div class="form-group">
+                    <label for="prompt">Describe your Ghibli scene:</label>
+                    <textarea id="prompt" class="prompt-input" placeholder="A cozy village on a floating island with a giant friendly creature, warm sunset lighting, Studio Ghibli style"></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>Ghibli Style Presets:</label>
+                    <div class="style-presets">
+                        <div class="style-preset active" data-style="whimsical">Whimsical</div>
+                        <div class="style-preset" data-style="fantasy">Fantasy</div>
+                        <div class="style-preset" data-style="nostalgic">Nostalgic</div>
+                        <div class="style-preset" data-style="adventure">Adventure</div>
+                        <div class="style-preset" data-style="mystical">Mystical</div>
+                    </div>
+                </div>
+                
+                <div class="form-group slider-container">
+                    <label for="style-intensity">Ghibli Style Intensity: <span id="intensity-value">70%</span></label>
+                    <input type="range" min="0" max="100" value="70" class="slider" id="style-intensity">
+                </div>
+                
+                <button type="submit" class="generate-btn">
+                    <i class="fas fa-sparkles"></i> Generate Magic
+                </button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Painting your Ghibli dream... This may take a moment</p>
+                <p class="totoro-tip"><small>Totoro is helping with the magic!</small></p>
+            </div>
+        </section>
+        
+        <!-- Result section -->
+        <section class="result-section" id="result-section">
+            <h2 class="section-title">
+                <i class="fas fa-image"></i> Your Ghibli Creation
+            </h2>
+            <img src="https://i.imgur.com/JQlEs6V.jpg" alt="Generated Ghibli image" class="generated-image" id="generated-image">
+            
+            <div class="action-buttons">
+                <button class="action-btn download-btn">
+                    <i class="fas fa-download"></i> Download
+                </button>
+                <button class="action-btn share-btn">
+                    <i class="fas fa-share-alt"></i> Share
+                </button>
+                <button class="action-btn new-btn" id="new-image-btn">
+                    <i class="fas fa-plus"></i> Create Another
+                </button>
+            </div>
+        </section>
+        
+        <!-- Features section -->
+        <section class="features-section">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-paint-brush"></i>
+                </div>
+                <h3 class="feature-title">Authentic Ghibli Style</h3>
+                <p>Our AI has been trained on hundreds of Studio Ghibli artworks to recreate that magical, hand-painted look.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h3 class="feature-title">Customizable Magic</h3>
+                <p>Adjust style intensity, choose themes, and fine-tune your creations to match your vision.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-images"></i>
+                </div>
+                <h3 class="feature-title">Share Your Art</h3>
+                <p>Download high-quality images or share directly to social media with our community of Ghibli fans.</p>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-links">
+            <a href="#" class="footer-link">About</a>
+            <a href="#" class="footer-link">Gallery</a>
+            <a href="#" class="footer-link">FAQ</a>
+            <a href="#" class="footer-link">Contact</a>
+        </div>
+        <p>Made with ♥ for Studio Ghibli fans around the world</p>
+        <p><small>This is a demo project. Not affiliated with Studio Ghibli.</small></p>
+    </footer>
+    
+    <!-- Totoro button -->
+    <div class="totoro" id="totoro"></div>
+    
+    <!-- Music toggle -->
+    <button class="music-toggle" id="music-toggle">
+        <i class="fas fa-music"></i>
+    </button>
+    
+    <!-- JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Style presets selection
+            const stylePresets = document.querySelectorAll('.style-preset');
+            stylePresets.forEach(preset => {
+                preset.addEventListener('click', function() {
+                    stylePresets.forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+            
+            // Style intensity slider
+            const intensitySlider = document.getElementById('style-intensity');
+            const intensityValue = document.getElementById('intensity-value');
+            intensitySlider.addEventListener('input', function() {
+                intensityValue.textContent = `${this.value}%`;
+            });
+            
+            // Form submission
+            const generatorForm = document.getElementById('generator-form');
+            const loadingSection = document.getElementById('loading');
+            const resultSection = document.getElementById('result-section');
+            
+            generatorForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Show loading
+                generatorForm.style.display = 'none';
+                loadingSection.style.display = 'block';
+                
+                // Simulate generation (in a real app, this would call your API)
+                setTimeout(() => {
+                    loadingSection.style.display = 'none';
+                    resultSection.style.display = 'block';
+                    
+                    // Scroll to result
+                    resultSection.scrollIntoView({ behavior: 'smooth' });
+                }, 3000);
+            });
+            
+            // New image button
+            const newImageBtn = document.getElementById('new-image-btn');
+            newImageBtn.addEventListener('click', function() {
+                resultSection.style.display = 'none';
+                generatorForm.style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            // Totoro animation
+            const totoro = document.getElementById('totoro');
+            totoro.addEventListener('click', function() {
+                alert('Hello! I\'m Totoro! Let me help you create something magical!');
+            });
+            
+            // Music toggle
+            const musicToggle = document.getElementById('music-toggle');
+            let musicPlaying = false;
+            // In a real app, you would add audio here
+            musicToggle.addEventListener('click', function() {
+                musicPlaying = !musicPlaying;
+                if (musicPlaying) {
+                    this.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    this.style.backgroundColor = 'var(--ghibli-blue)';
+                } else {
+                    this.innerHTML = '<i class="fas fa-music"></i>';
+                    this.style.backgroundColor = 'var(--ghibli-green)';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
